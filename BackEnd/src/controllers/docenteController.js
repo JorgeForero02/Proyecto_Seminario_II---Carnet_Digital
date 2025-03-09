@@ -1,5 +1,6 @@
 // controllers/docenteController.js
 import { Usuario, Docente } from '../models/index.js';
+import sequelize from '../database/connection.js';
 import bcrypt from 'bcrypt';
 
 // Obtener todos los docentes

@@ -55,9 +55,9 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/estudiante-materias:
+ * /api/estudiante_materias:
  *   get:
- *     summary: Retorna la lista de todas las relaciones estudiante-materia
+ *     summary: Retorna la lista de todas las relaciones estudiante_materias
  *     tags: [EstudianteMateria]
  *     security:
  *       - bearerAuth: []
@@ -75,9 +75,9 @@ router.get('/', verifyToken, getAllEstudianteMaterias);
 
 /**
  * @swagger
- * /api/estudiante-materias/{id}:
+ * /api/estudiante_materias/{id}:
  *   get:
- *     summary: Retorna una relación estudiante-materia por su ID
+ *     summary: Retorna una relación estudiante_materias por su ID
  *     tags: [EstudianteMateria]
  *     security:
  *       - bearerAuth: []
@@ -87,10 +87,10 @@ router.get('/', verifyToken, getAllEstudianteMaterias);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID de la relación estudiante-materia
+ *         description: ID de la relación estudiante_materias
  *     responses:
  *       200:
- *         description: Información de la relación estudiante-materia
+ *         description: Información de la relación estudiante_materias
  *         content:
  *           application/json:
  *             schema:
@@ -102,7 +102,7 @@ router.get('/:id', verifyToken, getEstudianteMateriaById);
 
 /**
  * @swagger
- * /api/estudiante-materias/estudiante/{estudiante_id}:
+ * /api/estudiante_materias/estudiante/{estudiante_id}:
  *   get:
  *     summary: Retorna todas las materias de un estudiante
  *     tags: [EstudianteMateria]
@@ -129,7 +129,7 @@ router.get('/estudiante/:estudiante_id', verifyToken, getMateriasByEstudiante);
 
 /**
  * @swagger
- * /api/estudiante-materias/materia/{materia_id}:
+ * /api/estudiante_materias/materia/{materia_id}:
  *   get:
  *     summary: Retorna todos los estudiantes de una materia
  *     tags: [EstudianteMateria]
@@ -156,7 +156,7 @@ router.get('/materia/:materia_id', verifyToken, getEstudiantesByMateria);
 
 /**
  * @swagger
- * /api/estudiante-materias/materia/{materia_id}/periodo/{periodo_academico}:
+ * /api/estudiante_materias/materia/{materia_id}/periodo/{periodo_academico}:
  *   get:
  *     summary: Retorna todos los estudiantes de una materia por periodo académico
  *     tags: [EstudianteMateria]
@@ -189,9 +189,9 @@ router.get('/materia/:materia_id/periodo/:periodo_academico', verifyToken, getEs
 
 /**
  * @swagger
- * /api/estudiante-materias:
+ * /api/estudiante_materias:
  *   post:
- *     summary: Crea una nueva relación estudiante-materia
+ *     summary: Crea una nueva relación estudiante_materias
  *     tags: [EstudianteMateria]
  *     security:
  *       - bearerAuth: []
@@ -274,7 +274,7 @@ router.put('/:id', verifyToken, updateEstudianteMateria);
 
 /**
  * @swagger
- * /api/estudiante-materias/{id}:
+ * /api/estudiante_materias/{id}:
  *   delete:
  *     summary: Cambia el estado de una relación estudiante-materia a 'RETIRADO'
  *     tags: [EstudianteMateria]

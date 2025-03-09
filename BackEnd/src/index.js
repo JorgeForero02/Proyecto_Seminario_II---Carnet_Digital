@@ -39,8 +39,8 @@ app.use('/api/asistencias_asesorias', AsistenciaAsesoriaRoutes);
 app.use('/api/asesorias', AsesoriaRoutes);
 app.use('/api/amigos_academicos', AmigoAcademicoRoutes);
 app.use('/api/asistencias_amigos_academicos', AsistenciaAmigoAcademico);
-app.use('/api/docentes_materias', DocenteMateriaRoutes);
-app.use('/api/estudiantes_materias', EstudianteMateriaRoutes);
+app.use('/api/docente_materias', DocenteMateriaRoutes);
+app.use('/api/estudiante_materias', EstudianteMateriaRoutes);
 
 // Inicializar el servidor y la conexión a la base de datos
 async function startServer() {
