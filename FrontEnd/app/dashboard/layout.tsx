@@ -3,6 +3,8 @@ import Link from "next/link"
 import { LogOut, User, QrCode, BookOpen, Settings, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import "./styles.css"
+import logoUniversidad from "../../public/Logo-nuevo-vertical-removebg-preview.png";
+import Image from "next/image";
 
 export default function DashboardLayout({
   children,
@@ -13,6 +15,9 @@ export default function DashboardLayout({
     <div className="min-h-screen flex flex-col">
       <header className="bg-black text-white py-4 px-6 sticky top-0 z-10">
         <div className="container mx-auto flex justify-between items-center">
+          <div className="bg-[#333333] p-2 rounded">
+            <Image src={logoUniversidad} alt="Foto del usuario" width={70} height={80} className="rounded-md" />
+          </div>
           <Link href="/dashboard" className="text-xl font-bold">
             UFPS Carné Digital
           </Link>
@@ -25,13 +30,13 @@ export default function DashboardLayout({
               </div>
             </div>
 
-            <Button variant="outline" size="sm" className="text-white border-white hover:bg-white/10">
+            <Button variant="outline" size="sm" className="text-black border-white hover:bg-white/10">
               <LogOut size={18} className="mr-2" />
               <span>Cerrar Sesión</span>
             </Button>
 
             <div className="md:hidden">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+              <Button variant="ghost" size="icon" className="text-white hover:bg-black/10">
                 <Menu size={24} />
               </Button>
             </div>
@@ -66,7 +71,7 @@ export default function DashboardLayout({
 
       <footer className="bg-black text-white py-4 px-6">
         <div className="container mx-auto text-center text-sm">
-          © {new Date().getFullYear()} Universidad Francisco de Paula Santander
+          © {new Date().getFullYear()} Universidad Francisco de Paula Santander - Carnet Digital
         </div>
       </footer>
     </div>

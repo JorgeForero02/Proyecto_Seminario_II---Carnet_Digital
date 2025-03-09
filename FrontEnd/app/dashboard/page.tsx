@@ -7,6 +7,10 @@ import { QrCode, Info, ToggleLeft, ToggleRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import logoUniversidad from "../../public/Logo-nuevo-vertical-removebg-preview.png";
+import logoHorizontalUniversidad from "../../public/Logo-nuevo-horizontal-removebg-preview.png";
+import Image from "next/image";
+
 
 export default function Dashboard() {
   const [isActive, setIsActive] = useState(true)
@@ -35,13 +39,17 @@ export default function Dashboard() {
             {flipped ? "Ver Frente" : "Ver Reverso"}
           </Button>
 
-          <div className="relative w-full max-w-[320px] transition-all duration-500 perspective">
-            <div className={`relative w-full transition-all duration-500 ${flipped ? "rotate-y-180" : ""}`}>
+          <div className="relative w-full max-w-[320px] h-[450px] transition-all duration-500 perspective mx-auto">
+            <div
+              className={`relative w-full h-full transition-all duration-500 transform-style-3d ${flipped ? "rotate-y-180" : ""}`}
+            >
               {!flipped ? (
-                // Front of card
-                <Card className="overflow-hidden border-0 shadow-lg rounded-lg">
-                  <CardContent className="p-0">
-                    <div className="relative bg-white">
+                // Front of card - ensure consistent height
+                <Card className="overflow-hidden border-0 shadow-lg rounded-lg absolute w-full h-full backface-hidden">
+                  <CardContent className="p-0 h-full">
+                    <div className="relative bg-white h-full">
+                      {/* Rest of the front card content remains the same */}
+
                       {/* Red shapes - top left */}
                       <div className="absolute top-0 left-0 w-24 h-24">
                         <div className="absolute top-0 left-0 w-16 h-16 bg-ufps-red rounded-br-[100%]"></div>
@@ -58,56 +66,55 @@ export default function Dashboard() {
                       <div className="absolute bottom-1/3 right-8 w-2 h-2 bg-ufps-red rounded-full"></div>
 
                       {/* Header with logo */}
-                      <div className="pt-4 px-4 flex justify-between items-start">
+                      <div className="pt-4 px-4 flex justify-end items-start">
                         <div className="flex items-center">
-                          <div className="bg-ufps-red text-white text-xs p-1 mr-1">UFPS</div>
-                          <div className="text-xs leading-tight">
-                            <div>Universidad Francisco</div>
-                            <div>de Paula Santander</div>
+                          <div>
+                            <Image src={logoUniversidad} alt="Foto del usuario" width={112} height={128} className="rounded-md" />
                           </div>
                         </div>
                       </div>
 
                       {/* Photo and info */}
                       <div className="p-4 pt-8">
-                        <div className="flex gap-4">
-                          <div className="h-32 w-28 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden border border-gray-200">
+                        <div className="flex flex-col items-center gap-4">
+                          {/* Imagen */}
+                          <div className="h-32 w-32 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border border-gray-200">
                             <User size={64} className="text-gray-400" />
                           </div>
-
-                          <div className="flex-1 flex flex-col justify-between">
+                          {/* Datos del usuario */}
+                          <div className="text-center space-y-1 text-sm">
                             <div>
-                              <h3 className="font-bold text-lg">Juan Perez</h3>
-                              <h4 className="font-bold text-lg">Castillo Lopez</h4>
+                              <h3 className="font-bold text-sm">Juan Perez</h3>
+                              <h4 className="font-bold text-sm">Castillo Lopez</h4>
                             </div>
 
-                            <div className="space-y-1 text-sm">
-                              <p>
-                                <span className="font-medium">C.C.:</span> 1151234567
-                              </p>
-                              <p>
-                                <span className="font-medium">Código:</span> 1331007
-                              </p>
-                              <p>
-                                <span className="font-medium">GS RH:</span> A+
-                              </p>
-                            </div>
+                            <p>
+                              <span className="text-xs">C.C.:</span> 1151234567
+                            </p>
+                            <p>
+                              <span className="text-xs">Código:</span> 1331007
+                            </p>
+                            <p>
+                              <span className="text-xs">GS RH:</span> A+
+                            </p>
                           </div>
-                        </div>
 
-                        {/* Role badge */}
-                        <div className="mt-4 bg-ufps-red text-white text-center py-1 rounded-md font-medium">
-                          Estudiante
+                          {/* Rol */}
+                          <div className="mt-1 bg-ufps-red text-white text-center py-1 rounded-md font-medium">
+                            Estudiante
+                          </div>
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               ) : (
-                // Back of card
-                <Card className="overflow-hidden border-0 shadow-lg rounded-lg rotate-y-180">
-                  <CardContent className="p-0">
-                    <div className="relative bg-white min-h-[400px]">
+                // Back of card - ensure consistent height
+                <Card className="overflow-hidden border-0 shadow-lg rounded-lg absolute w-full h-full backface-hidden rotate-y-180">
+                  <CardContent className="p-0 h-full">
+                    <div className="relative bg-white h-full">
+                      {/* Rest of the back card content remains the same */}
+
                       {/* Red shapes - top left */}
                       <div className="absolute top-0 left-0 w-24 h-24">
                         <div className="absolute top-0 left-0 w-16 h-16 bg-ufps-red rounded-br-[100%]"></div>
@@ -124,12 +131,10 @@ export default function Dashboard() {
                       <div className="absolute bottom-1/3 right-8 w-2 h-2 bg-ufps-red rounded-full"></div>
 
                       {/* Header with logo */}
-                      <div className="pt-4 px-4 flex justify-between items-start">
+                      <div className="pt-4 px-4 flex justify-end items-start">
                         <div className="flex items-center">
-                          <div className="bg-ufps-red text-white text-xs p-1 mr-1">UFPS</div>
-                          <div className="text-xs leading-tight">
-                            <div>Universidad Francisco</div>
-                            <div>de Paula Santander</div>
+                          <div>
+                            <Image src={logoHorizontalUniversidad} alt="Foto del usuario" width={140} height={140} className="rounded-md" />
                           </div>
                         </div>
                       </div>
