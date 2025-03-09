@@ -4,7 +4,20 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { QrCode, Plus, Calendar, Clock, Users, CheckCircle2, Eye } from "lucide-react"
+import {
+  QrCode,
+  Plus,
+  Calendar,
+  Clock,
+  Users,
+  CheckCircle2,
+  Eye,
+  BookOpen,
+  UserCheck,
+  UsersIcon,
+  MapPin,
+  ChevronRight,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -19,6 +32,98 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+
+// Mock data for student attendance history
+const studentAttendanceData = {
+  courses: [
+    {
+      id: "course-1",
+      name: "Ingeniería de Software",
+      date: "4 de Marzo, 2025",
+      time: "10:00 AM - 12:00 PM",
+      location: "Salón A-301",
+      professor: "Dr. Carlos Rodríguez",
+      status: "present",
+    },
+    {
+      id: "course-2",
+      name: "Sistemas de Bases de Datos",
+      date: "3 de Marzo, 2025",
+      time: "2:00 PM - 4:00 PM",
+      location: "Salón B-205",
+      professor: "Dra. María González",
+      status: "present",
+    },
+    {
+      id: "course-3",
+      name: "Fundamentos de Programación",
+      date: "2 de Marzo, 2025",
+      time: "8:00 AM - 10:00 AM",
+      location: "Laboratorio C-103",
+      professor: "Dr. Javier Pérez",
+      status: "present",
+    },
+    {
+      id: "course-4",
+      name: "Ingeniería de Software",
+      date: "25 de Febrero, 2025",
+      time: "10:00 AM - 12:00 PM",
+      location: "Salón A-301",
+      professor: "Dr. Carlos Rodríguez",
+      status: "absent",
+    },
+  ],
+  counseling: [
+    {
+      id: "counseling-1",
+      name: "Asesoría de Proyecto de Grado",
+      date: "1 de Marzo, 2025",
+      time: "3:00 PM - 4:00 PM",
+      location: "Oficina D-210",
+      professor: "Dr. Andrés Martínez",
+      status: "present",
+    },
+    {
+      id: "counseling-2",
+      name: "Asesoría de Matemáticas",
+      date: "27 de Febrero, 2025",
+      time: "11:00 AM - 12:00 PM",
+      location: "Sala de Estudio",
+      professor: "Dra. Laura Sánchez",
+      status: "present",
+    },
+  ],
+  academicFriend: [
+    {
+      id: "friend-1",
+      name: "Tutoría de Cálculo",
+      date: "28 de Febrero, 2025",
+      time: "4:00 PM - 5:30 PM",
+      location: "Biblioteca",
+      tutor: "Ana María Gómez",
+      status: "present",
+    },
+    {
+      id: "friend-2",
+      name: "Tutoría de Física",
+      date: "26 de Febrero, 2025",
+      time: "2:00 PM - 3:30 PM",
+      location: "Laboratorio F-105",
+      tutor: "Juan Carlos Vargas",
+      status: "present",
+    },
+    {
+      id: "friend-3",
+      name: "Tutoría de Programación",
+      date: "24 de Febrero, 2025",
+      time: "10:00 AM - 11:30 AM",
+      location: "Sala de Cómputo",
+      tutor: "Pedro Ramírez",
+      status: "absent",
+    },
+  ],
+}
 
 export default function AttendancePage() {
   const router = useRouter()
@@ -38,6 +143,10 @@ export default function AttendancePage() {
 
   const handleViewDetails = (courseId: string) => {
     router.push(`/dashboard/attendance/${courseId}`)
+  }
+
+  const handleViewStudentDetails = (attendanceType: string, attendanceId: string) => {
+    router.push(`/dashboard/attendance/student/${attendanceType}/${attendanceId}`)
   }
 
   return (
@@ -235,66 +344,232 @@ export default function AttendancePage() {
         </TabsContent>
 
         <TabsContent value="student" className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Tus Clases Registradas</CardTitle>
+                <CardDescription>Clases en las que estás actualmente registrado</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-2 border-b">
+                    <div>
+                      <h3 className="font-medium">Ingeniería de Software</h3>
+                      <p className="text-sm text-gray-500">Lunes, 10:00 AM - 12:00 PM</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-green-600 text-sm">
+                      <CheckCircle2 size={16} />
+                      <span>Registrado</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center pb-2 border-b">
+                    <div>
+                      <h3 className="font-medium">Sistemas de Bases de Datos</h3>
+                      <p className="text-sm text-gray-500">Lunes, 2:00 PM - 4:00 PM</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-green-600 text-sm">
+                      <CheckCircle2 size={16} />
+                      <span>Registrado</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center pb-2 border-b">
+                    <div>
+                      <h3 className="font-medium">Fundamentos de Programación</h3>
+                      <p className="text-sm text-gray-500">Martes, 8:00 AM - 10:00 AM</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-green-600 text-sm">
+                      <CheckCircle2 size={16} />
+                      <span>Registrado</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Escanear Código QR</CardTitle>
+                <CardDescription>Escanea un código QR para registrarte en una clase o asesoría</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center p-6">
+                <div className="bg-gray-100 p-8 rounded-lg mb-4 w-full max-w-xs flex items-center justify-center">
+                  <QrCode size={120} className="text-gray-400" />
+                </div>
+                <p className="text-center text-sm text-gray-500">
+                  Apunta tu cámara al código QR proporcionado por tu profesor para registrarte en una clase o sesión de
+                  asesoría
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-ufps-red hover:bg-ufps-red/90">Escanear Código QR</Button>
+              </CardFooter>
+            </Card>
+          </div>
+
+          {/* New Attendance History Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Tus Clases Registradas</CardTitle>
-              <CardDescription>Clases en las que estás actualmente registrado</CardDescription>
+              <CardTitle>Historial de Asistencias</CardTitle>
+              <CardDescription>Registro de todas tus asistencias</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <div>
-                    <h3 className="font-medium">Ingeniería de Software</h3>
-                    <p className="text-sm text-gray-500">Lunes, 10:00 AM - 12:00 PM</p>
-                  </div>
-                  <div className="flex items-center gap-1 text-green-600 text-sm">
-                    <CheckCircle2 size={16} />
-                    <span>Registrado</span>
-                  </div>
-                </div>
+              <Tabs defaultValue="courses">
+                <TabsList className="w-full mb-4">
+                  <TabsTrigger value="courses" className="flex items-center gap-1">
+                    <BookOpen size={16} />
+                    <span>Clases</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="counseling" className="flex items-center gap-1">
+                    <UserCheck size={16} />
+                    <span>Asesorías</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="academicFriend" className="flex items-center gap-1">
+                    <UsersIcon size={16} />
+                    <span>Amigo Académico</span>
+                  </TabsTrigger>
+                </TabsList>
 
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <div>
-                    <h3 className="font-medium">Sistemas de Bases de Datos</h3>
-                    <p className="text-sm text-gray-500">Lunes, 2:00 PM - 4:00 PM</p>
+                {/* Courses Tab */}
+                <TabsContent value="courses">
+                  <div className="space-y-3">
+                    {studentAttendanceData.courses.map((course) => (
+                      <div key={course.id} className="border rounded-md p-3 hover:bg-gray-50">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-medium">{course.name}</h3>
+                            <p className="text-sm text-gray-500">Profesor: {course.professor}</p>
+                          </div>
+                          {course.status === "present" ? (
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Presente</Badge>
+                          ) : (
+                            <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Ausente</Badge>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                          <div className="flex items-center gap-1">
+                            <Calendar size={14} className="text-gray-500" />
+                            <span>{course.date}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock size={14} className="text-gray-500" />
+                            <span>{course.time}</span>
+                          </div>
+                          <div className="flex items-center gap-1 col-span-2">
+                            <MapPin size={14} className="text-gray-500" />
+                            <span>{course.location}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-ufps-red"
+                            onClick={() => handleViewStudentDetails("courses", course.id)}
+                          >
+                            <span>Ver Detalles</span>
+                            <ChevronRight size={14} className="ml-1" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-1 text-green-600 text-sm">
-                    <CheckCircle2 size={16} />
-                    <span>Registrado</span>
-                  </div>
-                </div>
+                </TabsContent>
 
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <div>
-                    <h3 className="font-medium">Fundamentos de Programación</h3>
-                    <p className="text-sm text-gray-500">Martes, 8:00 AM - 10:00 AM</p>
+                {/* Counseling Tab */}
+                <TabsContent value="counseling">
+                  <div className="space-y-3">
+                    {studentAttendanceData.counseling.map((session) => (
+                      <div key={session.id} className="border rounded-md p-3 hover:bg-gray-50">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-medium">{session.name}</h3>
+                            <p className="text-sm text-gray-500">Profesor: {session.professor}</p>
+                          </div>
+                          {session.status === "present" ? (
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Presente</Badge>
+                          ) : (
+                            <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Ausente</Badge>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                          <div className="flex items-center gap-1">
+                            <Calendar size={14} className="text-gray-500" />
+                            <span>{session.date}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock size={14} className="text-gray-500" />
+                            <span>{session.time}</span>
+                          </div>
+                          <div className="flex items-center gap-1 col-span-2">
+                            <MapPin size={14} className="text-gray-500" />
+                            <span>{session.location}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-ufps-red"
+                            onClick={() => handleViewStudentDetails("counseling", session.id)}
+                          >
+                            <span>Ver Detalles</span>
+                            <ChevronRight size={14} className="ml-1" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-1 text-green-600 text-sm">
-                    <CheckCircle2 size={16} />
-                    <span>Registrado</span>
+                </TabsContent>
+
+                {/* Academic Friend Tab */}
+                <TabsContent value="academicFriend">
+                  <div className="space-y-3">
+                    {studentAttendanceData.academicFriend.map((session) => (
+                      <div key={session.id} className="border rounded-md p-3 hover:bg-gray-50">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-medium">{session.name}</h3>
+                            <p className="text-sm text-gray-500">Tutor: {session.tutor}</p>
+                          </div>
+                          {session.status === "present" ? (
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Presente</Badge>
+                          ) : (
+                            <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Ausente</Badge>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                          <div className="flex items-center gap-1">
+                            <Calendar size={14} className="text-gray-500" />
+                            <span>{session.date}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock size={14} className="text-gray-500" />
+                            <span>{session.time}</span>
+                          </div>
+                          <div className="flex items-center gap-1 col-span-2">
+                            <MapPin size={14} className="text-gray-500" />
+                            <span>{session.location}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-ufps-red"
+                            onClick={() => handleViewStudentDetails("academicFriend", session.id)}
+                          >
+                            <span>Ver Detalles</span>
+                            <ChevronRight size={14} className="ml-1" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Escanear Código QR</CardTitle>
-              <CardDescription>Escanea un código QR para registrarte en una clase o asesoría</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center p-6">
-              <div className="bg-gray-100 p-8 rounded-lg mb-4 w-full max-w-xs flex items-center justify-center">
-                <QrCode size={120} className="text-gray-400" />
-              </div>
-              <p className="text-center text-sm text-gray-500">
-                Apunta tu cámara al código QR proporcionado por tu profesor para registrarte en una clase o sesión de
-                asesoría
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full bg-ufps-red hover:bg-ufps-red/90">Escanear Código QR</Button>
-            </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>

@@ -89,12 +89,6 @@ export default function LoginPage() {
                   <Button type="submit" className="w-full bg-ufps-red hover:bg-ufps-red/90" disabled={loading}>
                     {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
                   </Button>
-                  <p className="mt-4 text-center text-sm">
-                    ¿No tienes una cuenta?{" "}
-                    <Link href="/register" className="text-black hover:underline">
-                      Regístrate aquí
-                    </Link>
-                  </p>
                 </CardFooter>
               </form>
             </TabsContent>
@@ -134,12 +128,6 @@ export default function LoginPage() {
                   <Button type="submit" className="w-full bg-black hover:bg-black/90" disabled={loading}>
                     {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
                   </Button>
-                  <p className="mt-4 text-center text-sm">
-                    ¿No tienes una cuenta?{" "}
-                    <Link href="/register" className="text-black hover:underline">
-                      Regístrate aquí
-                    </Link>
-                  </p>
                 </CardFooter>
               </form>
             </TabsContent>
@@ -179,12 +167,6 @@ export default function LoginPage() {
                   <Button type="submit" className="w-full bg-black hover:bg-black/90" disabled={loading}>
                     {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
                   </Button>
-                  <p className="mt-4 text-center text-sm">
-                    ¿No tienes una cuenta?{" "}
-                    <Link href="/register" className="text-black hover:underline">
-                      Regístrate aquí
-                    </Link>
-                  </p>
                 </CardFooter>
               </form>
             </TabsContent>
