@@ -62,6 +62,20 @@ Estudiante.associate = (models) => {
         foreignKey: 'estudiante_monitor_id',
         as: 'monitoriasRealizadas'
     });
+
+    // Nueva relación con EstudianteMateria
+    Estudiante.hasMany(models.EstudianteMateria, {
+        foreignKey: 'estudiante_id',
+        as: 'inscripciones'
+    });
+    
+    // Relación muchos a muchos con Materia a través de EstudianteMateria
+    Estudiante.belongsToMany(models.Materia, {
+        through: models.EstudianteMateria,
+        foreignKey: 'estudiante_id',
+        otherKey: 'materia_id',
+        as: 'materias'
+    });
 };
 
 export default Estudiante;
