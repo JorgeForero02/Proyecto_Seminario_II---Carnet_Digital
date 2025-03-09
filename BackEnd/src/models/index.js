@@ -9,6 +9,8 @@ import AsistenciaAmigoAcademico from './asistenciaAmigoAcademico.js';
 import AmigoAcademico from './amigoAcademico.js';
 import Materia from './materia.js';
 import AsistenciaClase from './asistenciaClase.js';
+import DocenteMateria from './docenteMateria.js';
+import EstudianteMateria from './estudianteMateria.js';
 
 // Agregar todos los modelos al objeto models
 const models = {
@@ -21,7 +23,9 @@ const models = {
     AsistenciaAmigoAcademico,
     AmigoAcademico,
     Materia,
-    AsistenciaClase
+    AsistenciaClase,
+    DocenteMateria,
+    EstudianteMateria
 };
 
 // Establecer asociaciones después de definir todos los modelos
@@ -41,5 +45,7 @@ export {
     AsistenciaAmigoAcademico,
     AmigoAcademico,
     Materia,
-    AsistenciaClase
+    AsistenciaClase,
+    DocenteMateria,
+    EstudianteMateria
 };

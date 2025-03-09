@@ -43,10 +43,24 @@ Docente.associate = (models) => {
         foreignKey: 'usuario_id',
         as: 'usuario'
     });
-
+    
     Docente.hasMany(models.Asesoria, {
         foreignKey: 'docente_id',
         as: 'asesorias'
+    });
+    
+    // Relación con materias a través de docente_materia
+    Docente.belongsToMany(models.Materia, {
+        through: models.DocenteMateria, // Match the exact name in your models object
+        foreignKey: 'docente_id',
+        otherKey: 'materia_id',
+        as: 'materias'
+    });
+    
+    // Also update
+    Docente.hasMany(models.DocenteMateria, {
+        foreignKey: 'docente_id',
+        as: 'asignaciones'
     });
 };
 

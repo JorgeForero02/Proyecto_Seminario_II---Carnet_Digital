@@ -12,7 +12,10 @@ import AsistenciaAsesoriaRoutes from './routes/asistenciaAsesoriaRoutes.js';
 import AsesoriaRoutes from './routes/asesoriaRoutes.js';
 import AmigoAcademicoRoutes from './routes/amigoAcademicoRoutes.js';
 import AsistenciaAmigoAcademico from './routes/asistenciaAmigoAcademicoRoutes.js';
+import DocenteMateriaRoutes from './routes/docenteMateriaRoutes.js';
+import EstudianteMateriaRoutes from './routes/estudianteMateriaRoutes.js';
 import { setupSwagger } from './swaggerConfig.js';
+import cors from 'cors';
 
 const app = express();
 
@@ -20,6 +23,7 @@ const app = express();
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors());
 
 // Configurar Swagger
 setupSwagger(app);
@@ -35,6 +39,8 @@ app.use('/api/asistencias_asesorias', AsistenciaAsesoriaRoutes);
 app.use('/api/asesorias', AsesoriaRoutes);
 app.use('/api/amigos_academicos', AmigoAcademicoRoutes);
 app.use('/api/asistencias_amigos_academicos', AsistenciaAmigoAcademico);
+app.use('/api/docentes_materias', DocenteMateriaRoutes);
+app.use('/api/estudiantes_materias', EstudianteMateriaRoutes);
 
 // Inicializar el servidor y la conexión a la base de datos
 async function startServer() {
