@@ -13,7 +13,7 @@ export default function Home() {
         </div>
         <div className="flex gap-4">
           <Link href="/login">
-            <Button variant="outline" className="text-white border-white hover:bg-white/10">
+            <Button variant="outline" className="text-black border-black hover:bg-white/10">
               Login
             </Button>
           </Link>
@@ -22,49 +22,33 @@ export default function Home() {
 
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl font-bold text-[#E30613] mb-6">Welcome to UFPS Digital Card</h1>
+          <h1 className="text-4xl font-bold text-[#E30613] mb-6">Carnet Digital UFPS</h1>
           <p className="text-lg mb-8">
-            The digital identification and attendance management system for the Systems Engineering program at Francisco
-            de Paula Santander University.
+            El sistema digital de identificación y gestión de asistencia para la carrera de Ingeniería de Sistemas de Francisco
+            Universidad de Paula Santander.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
+          <div className="grid md:grid-cols-1 gap-8 mb-12">
             <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-              <h2 className="text-2xl font-bold text-[#E30613] mb-4">For Students</h2>
+              <h2 className="text-2xl font-bold text-[#E30613] mb-4">Para uso de todos.</h2>
               <ul className="text-left space-y-2 mb-6">
-                <li>• Digital student ID card</li>
-                <li>• Easy class registration via QR code</li>
-                <li>• Track your attendance history</li>
-                <li>• Access university services</li>
+                <li>• Carnet digital unico.</li>
+                <li>• Fácil registro de asistencias.</li>
+                <li>• Acceso a servicios futuros.</li>
               </ul>
               <Link href="/login">
-                <Button className="w-full bg-[#E30613] hover:bg-[#c00510]">Student Login</Button>
-              </Link>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-              <h2 className="text-2xl font-bold text-[#E30613] mb-4">For Professors</h2>
-              <ul className="text-left space-y-2 mb-6">
-                <li>• Create and manage classes</li>
-                <li>• Generate QR codes for attendance</li>
-                <li>• Track student participation</li>
-                <li>• Manage advisory sessions</li>
-              </ul>
-              <Link href="/login">
-                <Button className="w-full bg-[#E30613] hover:bg-[#c00510]">Professor Login</Button>
+                <Button className="w-full bg-[#E30613] hover:bg-[#c00510]">Iniciar sesión.</Button>
               </Link>
             </div>
           </div>
 
           <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-2xl font-bold text-[#E30613] mb-4">About the Platform</h2>
+            <h2 className="text-2xl font-bold text-[#E30613] mb-4">Acerca de la Plataforma</h2>
             <p className="mb-4">
-              The UFPS Digital Card platform modernizes university identification and attendance tracking, replacing
-              traditional physical cards with a secure digital solution.
+              La plataforma de tarjetas digitales UFPS moderniza la identificación universitaria y el seguimiento de la asistencia, sustituyendo las tarjetas físicas tradicionales por una solución digital segura.
             </p>
             <p>
-              Scan QR codes to register for classes, view your academic information, and access university services -
-              all from your mobile device.
+              Escanea códigos QR para inscribirte en clases, ver tu información académica y acceder a los servicios universitarios, todo desde tu dispositivo móvil.
             </p>
           </div>
         </div>
