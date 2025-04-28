@@ -2,10 +2,22 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import LoginPage  from './pages/LoginPage';
+import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
+import AsistenciasPage from './pages/AsistenciasPage';
+import UserCard from './components/UserCard';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+// Simple wrapper para mostrar el UserCard como «página» de Carnet
+const CarnetPage = () => {
+  const { user } = useAuth();
+  return (
+    <div className="d-flex justify-content-center mb-4">
+      <UserCard user={user} />
+    </div>
+  );
+};
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -14,8 +26,7 @@ const ProtectedRoute = ({ children }) => {
 
 const RoleRoute = ({ allowedRoles, children }) => {
   const { roles } = useAuth();
-  // roles es siempre un arreglo (incluso si está vacío)
-  const hasAccess = roles.some(r => allowedRoles.includes(r));
+  const hasAccess = roles?.some(r => allowedRoles.includes(r));
   return hasAccess ? children : <Navigate to="/unauthorized" />;
 };
 
@@ -24,31 +35,31 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          {/* Ruta pública */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Cualquiera autenticado */}
+          {/* Dashboard y sus secciones hijas */}
           <Route
-            path="/dashboard"
+            path="/dashboard/*"
             element={
               <ProtectedRoute>
                 <DashboardPage />
               </ProtectedRoute>
             }
-          />
+          >
+            {/* Redirige automáticamente a «carnet» */}
+            <Route index element={<Navigate to="carnet" replace />} />
+            <Route path="carnet" element={<CarnetPage />} />
+            <Route path="asistencias" element={<AsistenciasPage />} />
+            <Route path="admin" element={
+              <RoleRoute allowedRoles={['ADMINISTRATIVO']}>
+                <AdminPage />
+              </RoleRoute>
+            }/>
+          </Route>
 
-          {/* Solo ADMINISTRATIVO puede entrar */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <RoleRoute allowedRoles={['ADMINISTRATIVO']}>
-                  <AdminPage />
-                </RoleRoute>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route path="*" element={<Navigate to="/login" />} />
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

@@ -1,72 +1,64 @@
 // src/contexts/AuthContext.js
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { api } from '../services/api';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [user, setUser]       = useState(null);
+  const [token, setToken]     = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
-  // Check if token exists on load
   useEffect(() => {
     const loadUser = async () => {
-      if (token) {
-        try {
-          // Set default authorization header
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          
-          // Decode token to extract information
-          const decodedToken = jwtDecode(token);
-          console.log('Decoded token:', decodedToken);
-          
-          // Get user profile
-          const response = await api.get('/usuarios/perfil');
-          
-          // You can combine profile data with token data if needed
-          setUser({
-            ...response.data,
-            roles: decodedToken.roles
-          });
-        } catch (error) {
-          console.error('Error loading user', error);
-          localStorage.removeItem('token');
-          setToken(null);
-        }
+      if (!token) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        // 1) Configura el header de autorización
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        // 2) Decodifica para obtener id y roles
+        const { id, roles: decodedRoles } = jwtDecode(token);
+
+        // 3) Solicita tu perfil al backend
+        const response = await api.get(`/usuarios/${id}`);
+        const profile = response.data;
+
+        // 4) Mezcla profile con los roles del token
+        setUser({
+          ...profile,
+          roles: decodedRoles
+        });
+      } catch (err) {
+        console.error('Error cargando perfil', err);
+        // Si falla (token inválido/expirado), limpia todo
+        localStorage.removeItem('token');
+        delete api.defaults.headers.common['Authorization'];
+        setToken(null);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
-    
+
     loadUser();
   }, [token]);
 
   const login = async (credentials) => {
     try {
       const response = await api.post('/login', credentials);
-      const { token, user } = response.data;
-      
-      // Store token in localStorage
-      localStorage.setItem('token', token);
-      
-      // Set authorization header
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      // Decode token for additional info
-      const decodedToken = jwtDecode(token);
-      console.log('Login decoded token:', decodedToken);
-      
-      // Set state
-      setToken(token);
-      setUser({
-        ...user,
-        // Merge with token info if needed
-        // decodedRole: decodedToken.role
-      });
-      
+      const { token: newToken, id } = response.data;
+
+      // Guarda token y actualiza estado
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+
       return true;
     } catch (error) {
       console.error('Login error', error);
@@ -87,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!token,
     login,
     logout,
-    loading
+    loading,
   };
 
   return (
