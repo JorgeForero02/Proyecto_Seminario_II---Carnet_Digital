@@ -33,7 +33,7 @@ import {
   Search,
 } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../styles/AsistenciasPage.css"; // We'll create this CSS file
+import "../styles/AsistenciasPage.css";
 
 const AsistenciasPage = () => {
   const { user } = useAuth();
@@ -41,230 +41,245 @@ const AsistenciasPage = () => {
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState("materias");
 
-  // Estados para materias y horarios
+  // Datos principales
   const [materias, setMaterias] = useState([]);
-  const [horarios, setHorarios] = useState([]);
   const [selectedMateria, setSelectedMateria] = useState(null);
-
-  // Estados para estudiantes (para docentes)
+  const [horarios, setHorarios] = useState([]);
   const [estudiantes, setEstudiantes] = useState([]);
-  const [searchEstudiante, setSearchEstudiante] = useState("");
-
-  // Estados para registro de asistencia
-  const [showRegistrarModal, setShowRegistrarModal] = useState(false);
-  const [asistenciaData, setAsistenciaData] = useState({
-    horario_clase_id: null,
-    fecha: new Date().toISOString().split("T")[0],
-    estudiantes: [],
-  });
-
-  // Estados para ver asistencias
   const [asistencias, setAsistencias] = useState([]);
   const [asistenciasLoading, setAsistenciasLoading] = useState(false);
-  const [selectedHorario, setSelectedHorario] = useState(null);
 
-  // Estados para filtros de asistencia
+  // Filtros
+  const [searchEstudiante, setSearchEstudiante] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("TODOS");
 
-  // Estados para edición
+  // Modales y edición
+  const [showRegistrarModal, setShowRegistrarModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingAsistencia, setEditingAsistencia] = useState(null);
-
-  // Estados para eliminación
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [asistenciaData, setAsistenciaData] = useState({
+    horario_clase_id: null,
+    fecha: "",
+    estudiantes: []
+  });
+  const [editingAsistencia, setEditingAsistencia] = useState(null);
   const [deletingAsistencia, setDeletingAsistencia] = useState(null);
 
-  // Cargar materias del usuario al inicio
+  // Carga materias para el usuario
   useEffect(() => {
-    const cargarMaterias = async () => {
+    const cargar = async () => {
       setLoading(true);
       try {
-        let response;
-        if (user.roles.includes("ESTUDIANTE")) {
-          response = await api.get("/estudiante-materias");
-          const detalle = await Promise.all(
-            response.data.map(async (em) => {
-              const [mRes, pRes] = await Promise.all([
-                api.get(`/materias/${em.materia_id}`),
-                api.get(`/periodos/${em.periodo_id}`),
-              ]);
-              return { ...em, materia: mRes.data, periodo: pRes.data };
-            })
-          );
-          setMaterias(detalle);
-        } else if (user.roles.includes("DOCENTE")) {
-          response = await api.get("/docente-materias");
-          const detalle = await Promise.all(
-            response.data.map(async (dm) => {
-              const [mRes, pRes] = await Promise.all([
-                api.get(`/materias/${dm.materia_id}`),
-                api.get(`/periodos/${dm.periodo_id}`),
-              ]);
-              return { ...dm, materia: mRes.data, periodo: pRes.data };
-            })
-          );
+        if (user.roles.includes("DOCENTE")) {
+          // Llamada al endpoint de estudiante-materias
+          const res = await api.get(`/docentes/${user.id}/materias`);
+          // El API devuelve [{ estado, materia: {…}, periodo: {…} }, …]
+          // Lo adaptamos para que coincida con el shape de 'materias'
+          const detalle = res.data.map(em => ({
+            materia_id: em.materia.id,
+            periodo_id: em.periodo.id,
+            materia: em.materia,
+            periodo: em.periodo
+          }));
           setMaterias(detalle);
         }
+        else if (user.roles.includes("ESTUDIANTE")) {
+          // Llamada al endpoint de estudiante-materias
+          const res = await api.get(`/estudiantes/${user.id}/materias`);
+          // El API devuelve [{ estado, materia: {…}, periodo: {…} }, …]
+          // Lo adaptamos para que coincida con el shape de 'materias'
+          const detalle = res.data.map(em => ({
+            materia_id: em.materia.id,
+            periodo_id: em.periodo.id,
+            materia: em.materia,
+            periodo: em.periodo
+          }));
+          setMaterias(detalle);
+        } else {
+          setMaterias([]);
+        }
       } catch (err) {
-        setError("Error cargando materias: " + err.message);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    if (user) cargarMaterias();
+    if (user) cargar();
   }, [user]);
 
-  // Cargar horarios cuando se selecciona una materia
-  const cargarHorarios = async (materiaId, periodoId) => {
-    try {
-      let data = [];
-      if (user.roles.includes("DOCENTE")) {
-        const dmRes = await api.get("/docente-materias", {
-          params: {
-            docente_id: user.id,
-            materia_id: materiaId,
-            periodo_id: periodoId,
-          },
-        });
-        if (dmRes.data.length) {
-          const idDM = dmRes.data[0].id;
-          const hRes = await api.get("/horario-clases", {
-            params: { docente_materia_id: idDM },
-          });
-          data = hRes.data;
-        }
-      } else if (user.roles.includes("ESTUDIANTE")) {
-        const emRes = await api.get("/estudiante-materias", {
-          params: { materia_id: materiaId, periodo_id: periodoId },
-        });
-        const promises = emRes.data.map((em) =>
-          api.get("/horario-clases", { params: { docente_materia_id: em.id } })
+  // Cuando selecciona materia
+  const handleMateriaSelect = async (m) => {
+    setSelectedMateria(m);
+
+    if (user.roles.includes("DOCENTE")) {
+      setActiveSection("horarios");
+      try {
+        const hRes = await api.get(`/docentes/${user.id}/materias/${m.materia_id}/horario`);
+        setHorarios(hRes.data);
+
+        // ————— Aquí empieza el bloque corregido —————
+        const eRes = await api.get(
+          `/docentes/${user.id}/materias/${m.materia_id}/estudiantes`
         );
-        const results = await Promise.all(promises);
-        data = results.flatMap((r) => r.data);
+
+        // 1) extraemos el array que puede venir en data o en data.estudiantes
+        const raw = Array.isArray(eRes.data)
+          ? eRes.data
+          : eRes.data.estudiantes || [];
+
+        // 2) lo mapeamos al shape que tu UI espera
+        const listaFormateada = raw.map(item => ({
+          estudiante_id: item.id,
+          estudiante: {
+            nombres: item.Usuario?.nombres || "",
+            apellidos: item.Usuario?.apellidos || ""
+          }
+        }));
+
+        setEstudiantes(listaFormateada);
+        // ————— Aquí termina el bloque corregido —————
+
+      } catch (err) {
+        setError(err.message);
       }
-      setHorarios(data);
-    } catch (err) {
-      setError("Error cargando horarios: " + err.message);
+    }
+    else if (user.roles.includes("ESTUDIANTE")) {
+      // Para estudiantes: cargamos primero el horario…
+      setActiveSection("horarios");
+      try {
+        const hRes = await api.get(`/estudiantes/${user.id}/horario`);
+        setHorarios(hRes.data);
+        // …y luego sus propias asistencias para la materia seleccionada
+        await cargarAsistencias();
+      } catch (err) {
+        setError(err.message);
+      }
+    } else {
+      // Otros roles (si aplica)
+      setMaterias([]);
     }
   };
 
-  // Cargar estudiantes para un materia+periodo (docentes)
-  const cargarEstudiantes = async (materiaId, periodoId) => {
-    if (!user.roles.includes("DOCENTE")) return;
-    try {
-      const emRes = await api.get("/estudiante-materias", {
-        params: { materia_id: materiaId, periodo_id: periodoId },
-      });
 
-      const detalle = await Promise.all(
-        emRes.data.map(async (em) => {
-          const uRes = await api.get(`/usuarios/${em.estudiante_id}`);
-          return { estudiante_id: em.estudiante_id, estudiante: uRes.data };
-        })
-      );
-      setEstudiantes(detalle);
-    } catch (err) {
-      setError("Error cargando estudiantes: " + err.message);
-    }
-  };
-
-  // Cargar asistencias para un horario específico
-  const cargarAsistencias = async (horarioId) => {
+  // Cargar asistencias (por materia)
+  const cargarAsistencias = async () => {
+    if (!selectedMateria) return;
     setAsistenciasLoading(true);
     try {
-      const aRes = await api.get("/asistencia-clases", {
-        params: { horario_clase_id: horarioId },
-      });
-      const detalle = await Promise.all(
-        aRes.data.map(async (a) => {
-          const uRes = await api.get(`/usuarios/${a.estudiante_id}`);
-          return { ...a, estudiante: uRes.data };
-        })
-      );
-      setAsistencias(detalle);
-      setSelectedHorario(horarioId);
+      let res;
+      let rawAsistencias;
+
+      if (user.roles.includes("DOCENTE")) {
+        // Llamada para docentes
+        res = await api.get(
+          `/docentes/${user.id}/materias/${selectedMateria.materia_id}/asistencias`
+        );
+        rawAsistencias = res.data.asistencias;
+
+        const mapped = rawAsistencias.map(a => ({
+          id: a.id,
+          fecha: a.fecha,
+          estado: a.estado,
+          estudiante: a.Estudiante.Usuario,
+          horario_clase: a.HorarioClase
+        }));
+
+        setAsistencias(mapped);
+
+      } else if (user.roles.includes("ESTUDIANTE")) {
+        // Llamada para estudiantes
+        res = await api.get(
+          `/estudiantes/${user.id}/materias/${selectedMateria.materia_id}/asistencias-clases`
+        );
+        rawAsistencias = res.data.asistencias;
+
+        // Mapeamos e incluimos al propio usuario en la propiedad 'estudiante'
+        const mapped = rawAsistencias.map(a => ({
+          id: a.id,
+          fecha: a.fecha,
+          estado: a.estado,
+          estudiante: {
+            nombres: user.nombres,      // o user.name según tu contexto
+            apellidos: user.apellidos
+          },
+          horario_clase: a.HorarioClase
+        }));
+
+        setAsistencias(mapped);
+      }
+
+      setActiveSection("asistencias");
     } catch (err) {
-      setError("Error cargando asistencias: " + err.message);
+      setError(err.message);
     } finally {
       setAsistenciasLoading(false);
     }
   };
 
-  // Seleccionar materia
-  const handleMateriaSelect = async (m) => {
-    setSelectedMateria(m);
-    await cargarHorarios(m.materia_id, m.periodo_id);
-    if (user.roles.includes("DOCENTE")) {
-      await cargarEstudiantes(m.materia_id, m.periodo_id);
-    }
-    setActiveSection("horarios");
-  };
 
-  // Preparar modal registro (docentes)
-  const prepararRegistroAsistencia = (horario) => {
+  // Registro de asistencia
+  const prepararRegistro = (h) => {
+    const estudiantesData = estudiantes.map(e => ({
+      estudiante_id: e.estudiante_id,
+      presente: true
+    }));
     setAsistenciaData({
-      horario_clase_id: horario.id,
-      fecha: new Date().toISOString().split("T")[0],
-      estudiantes: estudiantes.map((e) => ({
-        estudiante_id: e.estudiante_id,
-        presente: true,
-      })),
+      horario_clase_id: h.id,
+      fecha: new Date().toISOString().split('T')[0],
+      estudiantes: estudiantesData
     });
     setShowRegistrarModal(true);
   };
 
-  // Manejar cambios de asistencia en modal
-  const handleAsistenciaChange = (i, pres) => {
-    const arr = [...asistenciaData.estudiantes];
-    arr[i].presente = pres;
-    setAsistenciaData({ ...asistenciaData, estudiantes: arr });
-  };
-  // QUÉ AÑADIR
-  const handleAsistenciaChangeById = (estudiante_id, presente) => {
-    setAsistenciaData(current => ({
-      ...current,
-      estudiantes: current.estudiantes.map(e =>
-        e.estudiante_id === estudiante_id
-          ? { ...e, presente }
-          : e
+  const handleAsistenciaChangeById = (estudianteId, presente) => {
+    setAsistenciaData(prev => ({
+      ...prev,
+      estudiantes: prev.estudiantes.map(e =>
+        e.estudiante_id === estudianteId ? { ...e, presente } : e
       )
     }));
   };
 
-
-  // Guardar asistencias
   const guardarAsistencia = async () => {
     try {
-      await Promise.all(
-        asistenciaData.estudiantes.map((e) =>
-          api.post("/asistencia-clases", {
-            estudiante_id: e.estudiante_id,
-            horario_clase_id: asistenciaData.horario_clase_id,
-            fecha: asistenciaData.fecha,
-            estado: e.presente ? "PRESENTE" : "AUSENTE",
-          })
-        )
-      );
+      const registros = asistenciaData.estudiantes.map(e => ({
+        estudiante_id: e.estudiante_id,
+        horario_clase_id: asistenciaData.horario_clase_id,
+        fecha: asistenciaData.fecha,
+        estado: e.presente ? "PRESENTE" : "AUSENTE"
+      }));
+      await Promise.all(registros.map(r => api.post("/asistencia-clases", r)));
       setShowRegistrarModal(false);
-      await cargarAsistencias(asistenciaData.horario_clase_id);
-      setActiveSection("asistencias");
+      cargarAsistencias();
     } catch (err) {
-      setError("Error guardando asistencias: " + err.message);
+      setError(err.message);
     }
   };
 
-  // Actualizar asistencia
+  // Funciones de preparación para modales
+  const prepararRegistroAsistencia = (h) => {
+    prepararRegistro(h);
+  };
+
+  const prepararEdicion = (a) => {
+    setEditingAsistencia(a);
+    setShowEditModal(true);
+  };
+
+  const prepararEliminacion = (a) => {
+    setDeletingAsistencia(a);
+    setShowDeleteModal(true);
+  };
+
+  // Editar asistencia
   const actualizarAsistencia = async () => {
     try {
-      await api.put(`/asistencia-clases/${editingAsistencia.id}`, {
-        estado: editingAsistencia.estado
-      });
+      await api.put(`/asistencia-clases/${editingAsistencia.id}`, { estado: editingAsistencia.estado });
       setShowEditModal(false);
-      await cargarAsistencias(selectedHorario);
+      cargarAsistencias();
     } catch (err) {
-      setError("Error actualizando asistencia: " + err.message);
+      setError(err.message);
     }
   };
 
@@ -273,71 +288,16 @@ const AsistenciasPage = () => {
     try {
       await api.delete(`/asistencia-clases/${deletingAsistencia.id}`);
       setShowDeleteModal(false);
-      await cargarAsistencias(selectedHorario);
+      cargarAsistencias();
     } catch (err) {
-      setError("Error eliminando asistencia: " + err.message);
+      setError(err.message);
     }
   };
 
-  // Preparar modal edición
-  const prepararEdicion = (asistencia) => {
-    setEditingAsistencia(asistencia);
-    setShowEditModal(true);
-  };
-
-  // Preparar modal eliminación
-  const prepararEliminacion = (asistencia) => {
-    setDeletingAsistencia(asistencia);
-    setShowDeleteModal(true);
-  };
-
-  // Exportar asistencias a CSV
-  const exportarAsistencias = () => {
-    // Filtrar asistencias según los filtros aplicados
-    const filteredAsistencias = filtrarAsistencias();
-
-    // Crear contenido CSV
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Estudiante,Fecha,Estado\n";
-
-    filteredAsistencias.forEach(a => {
-      const row = [
-        `${a.estudiante.nombres} ${a.estudiante.apellidos}`,
-        new Date(a.fecha).toLocaleDateString(),
-        a.estado
-      ].join(",");
-      csvContent += row + "\n";
-    });
-
-    // Crear enlace de descarga
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `asistencias_${new Date().toISOString().split("T")[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Filtrar asistencias según filtros aplicados
-  const filtrarAsistencias = () => {
-    return asistencias.filter(a => {
-      // Filtro por fecha
-      const fechaMatch = dateFilter ?
-        new Date(a.fecha).toISOString().split("T")[0] === dateFilter : true;
-
-      // Filtro por estado
-      const estadoMatch = statusFilter === "TODOS" ?
-        true : a.estado === statusFilter;
-
-      return fechaMatch && estadoMatch;
-    });
-  };
-
-  // Filtrar estudiantes por búsqueda
+  // Filtros
   const filtrarEstudiantes = () => {
+    if (!Array.isArray(estudiantes)) return [];
     if (!searchEstudiante) return estudiantes;
-
     return estudiantes.filter(e =>
       `${e.estudiante.nombres} ${e.estudiante.apellidos}`
         .toLowerCase()
@@ -345,31 +305,43 @@ const AsistenciasPage = () => {
     );
   };
 
-  // Calcular estadísticas de asistencia
+  const filtrarAsistencias = () => asistencias.filter(a => {
+    const fDate = dateFilter ? a.fecha === dateFilter : true;
+    const fStatus = statusFilter === "TODOS" ? true : a.estado === statusFilter;
+    return fDate && fStatus;
+  });
+
+  // Estadísticas
   const calcularEstadisticas = () => {
     const total = asistencias.length;
     const presentes = asistencias.filter(a => a.estado === "PRESENTE").length;
     const ausentes = total - presentes;
-
-    return {
-      total,
-      presentes,
-      ausentes,
-      porcentajePresentes: total > 0 ? Math.round((presentes / total) * 100) : 0,
-      porcentajeAusentes: total > 0 ? Math.round((ausentes / total) * 100) : 0
-    };
+    const porcentajePresentes = total ? Math.round((presentes / total) * 100) : 0;
+    return { total, presentes, ausentes, porcentajePresentes };
   };
 
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="spinner-container">
-          <Spinner animation="border" variant="danger" />
-          <span className="ms-3">Cargando datos...</span>
-        </div>
-      </div>
-    );
-  }
+  // Exportar asistencias
+  const exportarAsistencias = () => {
+    const data = filtrarAsistencias();
+    const csv = [
+      ['Estudiante', 'Fecha', 'Estado'],
+      ...data.map(a => [
+        `${a.estudiante.nombres} ${a.estudiante.apellidos}`,
+        new Date(a.fecha).toLocaleDateString(),
+        a.estado
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `asistencias_${selectedMateria?.materia.nombre}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  if (loading) return <div className="loading"><Spinner animation="border" /> Cargando...</div>;
 
   return (
     <Container fluid className="py-4 asistencias-container">
@@ -425,7 +397,7 @@ const AsistenciasPage = () => {
         <Button
           variant={activeSection === 'asistencias' ? 'danger' : 'outline-danger'}
           className={`tab-button ${!selectedMateria ? 'disabled' : ''}`}
-          onClick={() => selectedMateria && setActiveSection('asistencias')}
+          onClick={() => selectedMateria && cargarAsistencias()}
           disabled={!selectedMateria}
         >
           <FileText size={18} className="me-2" /> Asistencias
@@ -438,9 +410,9 @@ const AsistenciasPage = () => {
           <Row className="row-cols-1 row-cols-md-3 g-4 mt-3">
             {materias.map((m) => (
               <Col key={`${m.materia_id}-${m.periodo_id}`}>
-                <div
-                  className={`materia-card ${selectedMateria?.materia_id === m.materia_id ? "selected" : ""
-                    }`}
+                <Button
+                  variant="light"
+                  className={`materia-card ${selectedMateria?.materia_id === m.materia_id ? "selected" : ""}`}
                   onClick={() => handleMateriaSelect(m)}
                 >
                   <div className="materia-icon">
@@ -453,7 +425,7 @@ const AsistenciasPage = () => {
                       {m.periodo.nombre}
                     </Badge>
                   </div>
-                </div>
+                </Button>
               </Col>
             ))}
             {materias.length === 0 && (
@@ -471,6 +443,7 @@ const AsistenciasPage = () => {
       {/* Sección Horarios */}
       {activeSection === "horarios" && (
         <div className="section-content">
+
           <div className="card shadow-sm mb-4 mt-3">
             <div className="card-header bg-white">
               <h5 className="mb-0">
@@ -511,10 +484,7 @@ const AsistenciasPage = () => {
                             variant="outline-info"
                             size="sm"
                             className="me-2 btn-icon"
-                            onClick={() => {
-                              cargarAsistencias(h.id);
-                              setActiveSection("asistencias");
-                            }}
+                            onClick={() => cargarAsistencias()}
                           >
                             <FileText size={16} /> Ver
                           </Button>
@@ -810,8 +780,7 @@ const AsistenciasPage = () => {
             </div>
           )}
         </div>
-      )}         {/* cierra activeSection === "asistencias" */}
-
+      )}
 
       {/* Modales */}
       {/* 1) Modal de Registro */}
@@ -838,7 +807,6 @@ const AsistenciasPage = () => {
             </thead>
             <tbody>
               {estudiantes.map(e => {
-                // Buscamos el objeto de asistencia con este ID
                 const a = asistenciaData.estudiantes.find(x => x.estudiante_id === e.estudiante_id);
                 return (
                   <tr key={e.estudiante_id}>
