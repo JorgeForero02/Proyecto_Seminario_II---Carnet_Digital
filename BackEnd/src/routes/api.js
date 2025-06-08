@@ -113,7 +113,7 @@ const resources = {
   AsistenciaClase: {
     path: "asistencia-clases",
     fields: ["estudiante_id", "horario_clase_id", "fecha", "estado"],
-    roles: { create: ["DOCENTE"], all: ["ADMINISTRATIVO"] },
+    roles: { all: ["ADMINISTRATIVO", "DOCENTE"] },
   },
   TipoAsesoria: {
     path: "tipos-asesoria",

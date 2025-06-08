@@ -29,10 +29,10 @@ const DashboardPage = () => {
           <div className="d-flex align-items-center">
             <div className="logo-container bg-secondary p-2 rounded me-3">
               <img
-                src="/logo-universidad.png"
+                src="/blanco.png"
                 alt="Logo Universidad"
                 width="70"
-                height="80"
+
                 className="rounded"
               />
             </div>
@@ -81,18 +81,6 @@ const DashboardPage = () => {
               className="nav-link d-flex align-items-center py-2 px-3 text-dark rounded hover-bg-light text-start border-0 bg-transparent"
             >
               <AsesoriaIcon size={20} className="me-2" /> Asesorías
-            </button>
-            <button
-              onClick={() => navigate('/dashboard/perfil')}
-              className="nav-link d-flex align-items-center py-2 px-3 text-dark rounded hover-bg-light text-start border-0 bg-transparent"
-            >
-              <User size={20} className="me-2" /> Perfil
-            </button>
-            <button
-              onClick={() => navigate('/dashboard/configuracion')}
-              className="nav-link d-flex align-items-center py-2 px-3 text-dark rounded hover-bg-light text-start border-0 bg-transparent"
-            >
-              <Settings size={20} className="me-2" /> Configuración
             </button>
           </nav>
         </aside>

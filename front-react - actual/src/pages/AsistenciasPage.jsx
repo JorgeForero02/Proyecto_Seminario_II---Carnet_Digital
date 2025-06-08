@@ -66,6 +66,18 @@ const AsistenciasPage = () => {
   const [editingAsistencia, setEditingAsistencia] = useState(null);
   const [deletingAsistencia, setDeletingAsistencia] = useState(null);
 
+  const dayMap = {
+    LUNES: 1,
+    MARTES: 2,
+    MIERCOLES: 3,
+    JUEVES: 4,
+    VIERNES: 5,
+    SABADO: 6,
+    SÁBADO: 6,
+    DOMINGO: 7
+  };
+
+
   // Carga materias para el usuario
   useEffect(() => {
     const cargar = async () => {
@@ -116,8 +128,12 @@ const AsistenciasPage = () => {
       setActiveSection("horarios");
       try {
         const hRes = await api.get(`/docentes/${user.id}/materias/${m.materia_id}/horario`);
-        setHorarios(hRes.data);
+        const horariosFormateados = hRes.data.map(h => ({
+          ...h,
+          dia_semana: dayMap[h.dia_semana.toUpperCase()] || null
+        }));
 
+        setHorarios(horariosFormateados);
         // ————— Aquí empieza el bloque corregido —————
         const eRes = await api.get(
           `/docentes/${user.id}/materias/${m.materia_id}/estudiantes`
@@ -149,8 +165,12 @@ const AsistenciasPage = () => {
       setActiveSection("horarios");
       try {
         const hRes = await api.get(`/estudiantes/${user.id}/horario`);
-        setHorarios(hRes.data);
-        // …y luego sus propias asistencias para la materia seleccionada
+        const horariosFormateados = hRes.data.map(h => ({
+          ...h,
+          dia_semana: dayMap[h.dia_semana.toUpperCase()] || null
+        }));
+
+        setHorarios(horariosFormateados);
         await cargarAsistencias();
       } catch (err) {
         setError(err.message);
