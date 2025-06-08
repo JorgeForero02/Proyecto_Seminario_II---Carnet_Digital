@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
 import AsistenciasPage from './pages/AsistenciasPage';
+import AsesoriasPage from './pages/AsesoriasPage';
 import UserCard from './components/UserCard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -51,6 +52,7 @@ function App() {
             <Route index element={<Navigate to="carnet" replace />} />
             <Route path="carnet" element={<CarnetPage />} />
             <Route path="asistencias" element={<AsistenciasPage />} />
+            <Route path="asesorias" element={<AsesoriasPage />} />
             <Route path="admin" element={
               <RoleRoute allowedRoles={['ADMINISTRATIVO']}>
                 <AdminPage />

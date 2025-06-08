@@ -1,4 +1,4 @@
-// src/pages/DashboardPage.js
+// src/pages/DashboardPage.js (actualizado)
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Outlet } from 'react-router-dom';
@@ -8,7 +8,8 @@ import {
   BookOpen,
   User,
   Settings,
-  Menu
+  Menu,
+  Users as AsesoriaIcon
 } from 'lucide-react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/DashboardPage.css';
@@ -61,43 +62,42 @@ const DashboardPage = () => {
       {/* Layout principal */}
       <div className="main-content d-flex flex-grow-1">
         {/* Sidebar */}
-        <aside
-          className={`sidebar bg-light border-end p-3 ${sidebarOpen ? 'd-block' : 'd-none'} d-md-block`}
-          style={{ width: 250 }}
-        >
+        <aside className={`sidebar bg-light border-end p-3 ${sidebarOpen ? 'd-block' : 'd-none'} d-md-block`} style={{ width: 250 }}>
           <nav className="nav flex-column">
             <button
               onClick={() => navigate('/dashboard/carnet')}
               className="nav-link d-flex align-items-center py-2 px-3 text-dark rounded hover-bg-light text-start border-0 bg-transparent"
             >
-              <QrCode size={20} className="me-2" />
-              Carné Digital
+              <QrCode size={20} className="me-2" /> Carné Digital
             </button>
             <button
               onClick={() => navigate('/dashboard/asistencias')}
               className="nav-link d-flex align-items-center py-2 px-3 text-dark rounded hover-bg-light text-start border-0 bg-transparent"
             >
-              <BookOpen size={20} className="me-2" />
-              Asistencias
+              <BookOpen size={20} className="me-2" /> Asistencias
+            </button>
+            <button
+              onClick={() => navigate('/dashboard/asesorias')}
+              className="nav-link d-flex align-items-center py-2 px-3 text-dark rounded hover-bg-light text-start border-0 bg-transparent"
+            >
+              <AsesoriaIcon size={20} className="me-2" /> Asesorías
             </button>
             <button
               onClick={() => navigate('/dashboard/perfil')}
               className="nav-link d-flex align-items-center py-2 px-3 text-dark rounded hover-bg-light text-start border-0 bg-transparent"
             >
-              <User size={20} className="me-2" />
-              Perfil
+              <User size={20} className="me-2" /> Perfil
             </button>
             <button
               onClick={() => navigate('/dashboard/configuracion')}
               className="nav-link d-flex align-items-center py-2 px-3 text-dark rounded hover-bg-light text-start border-0 bg-transparent"
             >
-              <Settings size={20} className="me-2" />
-              Configuración
+              <Settings size={20} className="me-2" /> Configuración
             </button>
           </nav>
         </aside>
 
-        {/* Aquí se inyecta la página hija (Carnet, Asistencias, etc.) */}
+        {/* Contenido */}
         <main className="content p-4 bg-light flex-grow-1">
           <Outlet />
         </main>

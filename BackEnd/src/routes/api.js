@@ -183,6 +183,30 @@ const resources = {
   },
 };
 
+router.get("/asesorias", async (req, res) => {
+  const where = {};
+  if (req.query.materia_id) where.materia_id = req.query.materia_id;
+
+  const asesorias = await Models.Asesoria.findAll({
+    where,
+    include: [
+      { model: Models.TipoAsesoria, attributes: ["nombre"] },
+      { model: Models.PeriodoAcademico, attributes: ["nombre"] },
+      {
+        model: Models.Docente,
+        include: [
+          {
+            model: Models.Usuario,
+            attributes: { exclude: ["password"] },
+          },
+        ],
+      },
+    ],
+  });
+
+  res.json(asesorias);
+});
+
 // ============================================================================
 // FUNCIONES AUXILIARES PARA CONSULTAS COMPLEJAS
 // ============================================================================
@@ -690,6 +714,7 @@ router.get(
   async (req, res) => {
     try {
       const docenteId = req.params.id;
+      // Reuso funciones auxiliares para ids…
       const asesoriaIds = await getAsesoriaIds(docenteId);
       const horarioIds = await getHorarioAsesoriaIds(asesoriaIds);
 
@@ -713,12 +738,62 @@ router.get(
         order: [["fecha_hora", "DESC"]],
       });
 
-      res.json(asistencias);
+      // **Normalizamos** la salida para que siempre sea { asistencias: [...] }
+      res.json({ asistencias });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   }
 );
+
+// Docente ve todas sus asesorías - PROTEGIDO
+router.get(
+  "/docentes/:id/asesorias",
+  verifyToken,
+  roleMiddleware(["DOCENTE"]),
+  async (req, res) => {
+    try {
+      const docenteId = req.params.id;
+
+      // Obtener todas las asesorías del docente, con sus detalles y horarios
+      const asesorias = await Models.Asesoria.findAll({
+        where: { docente_id: docenteId },
+        include: [
+          {
+            model: Models.Materia,
+            attributes: ["id", "codigo", "nombre"],
+          },
+          {
+            model: Models.TipoAsesoria,
+            attributes: ["id", "nombre"],
+          },
+          {
+            model: Models.PeriodoAcademico,
+            attributes: ["id", "codigo", "nombre", "fecha_inicio", "fecha_fin"],
+          },
+          {
+            model: Models.HorarioAsesoria,
+            attributes: ["id", "dia_semana", "hora_inicio", "hora_fin", "ubicacion"],
+            order: [
+              ["dia_semana", "ASC"],
+              ["hora_inicio", "ASC"],
+            ],
+          },
+        ],
+      });
+
+      res.json({
+        docenteId,
+        totalAsesorias: asesorias.length,
+        asesorias,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 
 // Docente ve las asistencias de asesorías por materia - PROTEGIDO
 router.get(
@@ -950,6 +1025,71 @@ router.get(
     }
   }
 );
+
+// Estudiante ve los horarios de asesorías por materia - PÚBLICO
+router.get(
+  "/estudiantes/:id/materias/:materiaId/horarios-asesorias",
+  async (req, res) => {
+    try {
+      const { id: estudianteId, materiaId } = req.params;
+
+      // Verificar matrícula…
+      const em = await Models.EstudianteMateria.findAll({ where: { estudiante_id: estudianteId, materia_id: materiaId } });
+      if (em.length === 0) {
+        return res
+          .status(404)
+          .json({ error: "No estás matriculado en esa materia." });
+      }
+
+      // Obtener IDs de asesoría
+      const periodos = em.map((e) => e.periodo_id);
+      const asesorias = await Models.Asesoria.findAll({
+        where: { materia_id: materiaId, periodo_id: { [Op.in]: periodos } },
+        attributes: ["id"],
+      });
+      const asesoriaIds = asesorias.map((a) => a.id);
+      if (asesoriaIds.length === 0) {
+        return res.json({ materiaId, total: 0, horarios: [] });
+      }
+
+      // **Incluir explícitamente** Docente → Usuario
+      const horarios = await Models.HorarioAsesoria.findAll({
+      where: { asesoria_id: { [Op.in]: asesoriaIds } },
+      include: [
+        {
+          model: Models.Asesoria,
+          include: [
+            {
+              model: Models.Docente,
+              include: [
+                {
+                  model: Models.Usuario,
+                  attributes: { exclude: ["password"] },
+                },
+              ],
+            },
+          ],
+            attributes: [], // opcional para no duplicar datos
+          },
+        ],
+        order: [
+          ["dia_semana", "ASC"],
+          ["hora_inicio", "ASC"],
+        ],
+      });
+
+      res.json({
+        materiaId,
+        total: horarios.length,
+        horarios,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 
 // Estudiante ve todas sus asistencias de Amigo Académico - PROTEGIDO
 router.get(
